@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BIJAK — Smart Classroom Management · Powered by KAWAN</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <!-- Three.js (used by judge loading screen for Kawan 3D orb) -->
+  <script src="https://unpkg.com/three@0.140.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.140.0/examples/js/loaders/MTLLoader.js"></script>
+  <script src="https://unpkg.com/three@0.140.0/examples/js/loaders/OBJLoader.js"></script>
+</head>
+<body>
+
+<div id="root"></div>
+
+<!-- Hidden form so Netlify's build bot detects the Contact form. -->
+<form name="bijak-contact-um" netlify="true" netlify-honeypot="bot-field" hidden>
+  <input type="text"     name="name"/>
+  <input type="email"    name="email"/>
+  <input type="text"     name="institution"/>
+  <input type="text"     name="subject"/>
+  <textarea              name="message"></textarea>
+  <input type="text"     name="bot-field"/>
+</form>
+
+<!-- Data -->
+<script src="data.js"></script>
+
+<!-- Shared components FIRST (KLSkylineSVG, HibiscusAccent) -->
+<script type="text/babel" src="SharedComponents.jsx"></script>
+
+<!-- Page components -->
+<script type="text/babel" src="Dashboard.jsx"></script>
+<script type="text/babel" src="ClassroomPage.jsx"></script>
+<script type="text/babel" src="KawanChat.jsx"></script>
+<script type="text/babel" src="Tutorial.jsx"></script>
+<script type="text/babel" src="AboutPage.jsx"></script>
+<script type="text/babel" src="FAQPage.jsx"></script>
+<script type="text/babel" src="TroubleshootingPage.jsx"></script>
+<script type="text/babel" src="ContactPage.jsx"></script>
+
+<!-- Judge route (Technothon live demo, password-gated) -->
+<script type="text/babel" src="JudgeGate.jsx"></script>
+<script type="text/babel" src="JudgeLoading.jsx"></script>
+<script type="text/babel" src="JudgeKawan.jsx"></script>
+<script type="text/babel" src="JudgeDashboard.jsx"></script>
+
+<!-- Cross-route: Try-Live RPG popup + Scale calculator page -->
+<script type="text/babel" src="TryLivePopup.jsx"></script>
+<script type="text/babel" src="ScalePage.jsx"></script>
+<script type="text/babel" src="InsightsPage.jsx"></script>
+<script type="text/babel" src="HomeDashboard.jsx"></script>
+
+<!-- Main App -->
+<script type="text/babel">
+
+/* ── JUDGE APP — separate Technothon live demo route (gate → loading → dashboard) ── */
+function JudgeApp() {
+  const [stage, setStage] = React.useState(() => {
+    if (typeof localStorage === 'undefined') return 'gate';
+    const tok = localStorage.getItem('judge_pass');
+    const ts  = parseInt(localStorage.getItem('judge_pass_ts') || '0', 10);
+    const stillValid = tok && (Date.now() - ts) < 3600000;   // 1-hour window
+    return stillValid ? 'loading' : 'gate';
+  });
+  if (stage === 'gate')    return <JudgeGate    onPass={() => setStage('loading')} />;
+  if (stage === 'loading') return <JudgeLoading onDone={() => setStage('dashboard')} />;
+  return <JudgeDashboard />;
+}
+
+/* ── PAGE NAV STRIP (additive — sits below header) ── */
+const UM_NAV_LINKS = [
+  { id: 'home',            label: 'Home' },
+  { id: 'dashboard',       label: 'Dashboard' },
+  { id: 'insights',        label: 'Insights' },
+  { id: 'scale',           label: 'Scale' },
+  { id: 'about',           label: 'About' },
+  { id: 'faq',             label: 'FAQ' },
+  { id: 'troubleshooting', label: 'Help' },
+  { id: 'contact',         label: 'Contact' },
+];
+function UM_NavStrip({ page, onPage }) {
+  return (
+    <nav className="um-nav-strip">
+      {UM_NAV_LINKS.map(n => (
+        <button key={n.id} onClick={() => onPage(n.id)}
+          className={`um-nav-item ${page === n.id ? 'active' : ''}`}>
+          {n.label}
+        </button>
+      ))}
+    </nav>
+  );
+}
+
+/* ── HEADER ── */
+function Header({ page, onBack, onAbout, theme, onThemeToggle }) {
+  const isLight = theme === 'light';
+  const headerBg = isLight ? 'rgba(255,255,255,0.97)' : 'rgba(15,31,58,0.97)';
+  const borderCol = isLight ? 'rgba(26,63,143,0.18)' : 'rgba(255,199,44,0.15)';
+  return (
+    <header className="header" style={{ background: headerBg, borderColor: borderCol }}>
+      <div style={{ display:'flex', flexDirection:'column', gap:1, cursor:'pointer', flexShrink:0 }}
+           onClick={page === 'about' ? onBack : (page === 'classroom' ? onBack : onAbout)}>
+        <div className="logo-text">BIJAK</div>
+        <div className="logo-tagline">Powered by KAWAN · Universiti Malaya</div>
+      </div>
+
+      {page === 'dashboard' && (
+        <div className="header-search">
+          <span className="search-icon">🔍</span>
+          <input type="text" placeholder="Search classroom..." id="main-search"
+            onChange={e => {
+              window.__bijak_search = e.target.value;
+              window.dispatchEvent(new CustomEvent('bijak-search', { detail: e.target.value }));
+            }} />
+        </div>
+      )}
+
+      <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:10, flexShrink:0 }}>
+        {page === 'classroom' && (
+          <button className="back-btn" onClick={onBack} style={{ margin:0 }}>← Dashboard</button>
+        )}
+        {page === 'about' && (
+          <button className="back-btn" onClick={onBack} style={{ margin:0 }}>← Dashboard</button>
+        )}
+        {page === 'dashboard' && (
+          <button className="quick-btn" onClick={onAbout} style={{ padding:'5px 12px', fontSize:11 }}>
+            About BIJAK
+          </button>
+        )}
+
+        {/* Theme toggle — minimal icon */}
+        <button className="theme-toggle" onClick={onThemeToggle} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+          {theme === 'dark' ? (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/>
+              <line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          )}
+          <span style={{ fontSize: 11 }}>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+        </button>
+
+        <div style={{ fontSize:11, color:'var(--text-secondary)', textAlign:'right', lineHeight:1.4 }}>
+          <div>Tue, 29 Apr 2026</div>
+          <div style={{ color:'var(--gold)' }}>3:52 PM</div>
+        </div>
+        <div style={{ width:8, height:8, borderRadius:'50%', background:'#2ECC71', boxShadow:'0 0 8px #2ECC71', flexShrink:0 }}></div>
+      </div>
+    </header>
+  );
+}
+
+/* ── MAIN APP ── */
+function App() {
+  // Judge route detection — entered via ?judge=1 URL param.
+  // The UM popup's "Try Live Version" button opens this in a new tab.
+  const isJudgeRoute = typeof window !== 'undefined'
+    && new URLSearchParams(window.location.search).get('judge') === '1';
+  if (isJudgeRoute) {
+    return <JudgeApp />;
+  }
+
+  const [page, setPage]             = React.useState('about');
+  const [selectedRoom, setSelectedRoom] = React.useState(null);
+  const [chatOpen, setChatOpen]     = React.useState(false);
+  const [activeAlert, setActiveAlert] = React.useState(null);
+  const [theme, setTheme]           = React.useState('dark');
+
+  // Try-Live popup state — auto-fires once after ~90s of exploration
+  const [tryLiveVisible, setTryLiveVisible] = React.useState(false);
+  React.useEffect(() => {
+    if (page === 'about') return;
+    if (typeof localStorage !== 'undefined' && localStorage.getItem('um_try_live_dismissed') === '1') return;
+    const t = setTimeout(() => setTryLiveVisible(true), 90 * 1000);
+    return () => clearTimeout(t);
+  }, [page]);
+
+  // Tutorial state
+  const [tutActive, setTutActive]   = React.useState(false);
+  const [tutStep, setTutStep]       = React.useState(0);
+
+  // Apply theme synchronously — called directly, not in useEffect
+  const applyTheme = React.useCallback((t) => {
+    const root = document.documentElement;
+    const light = t === 'light';
+    const vars = light ? {
+      '--royal-blue':            '#1A3F8F',
+      '--gold':                  '#D4960A',
+      '--near-black':            '#2A4A8F',
+      '--card-bg':               '#FFFFFF',
+      '--panel-bg':              '#F0F5FF',
+      '--border':                'rgba(26,63,143,0.18)',
+      '--text-primary':          '#0F1F3A',
+      '--text-secondary':        'rgba(15,31,58,0.55)',
+      '--body-bg':               '#EEF3FF',
+      '--header-bg':             'rgba(255,255,255,0.97)',
+      '--stat-bar-bg':           'linear-gradient(90deg,#dce8ff 0%,#eef3ff 50%,#dce8ff 100%)',
+      '--red-alert':             '#CC2222',
+      '--green-ok':              '#1A9950',
+      '--gold-glow':             '0 0 10px rgba(212,150,10,0.4),0 0 20px rgba(212,150,10,0.2)',
+      '--gold-glow-strong':      '0 0 14px rgba(212,150,10,0.7),0 0 32px rgba(212,150,10,0.3)',
+      '--red-glow':              '0 0 10px rgba(204,34,34,0.5)',
+      '--feed-bg':               'rgba(26,63,143,0.07)',
+      '--feed-border':           'rgba(26,63,143,0.25)',
+      '--input-bg':              'rgba(26,63,143,0.08)',
+      '--leaderboard-row-hover': 'rgba(26,63,143,0.05)',
+      '--toggle-off-bg':         'rgba(0,0,0,0.08)',
+      '--toggle-off-border':     'rgba(0,0,0,0.15)',
+      '--glow-white':            '#0F1F3A',
+    } : {
+      '--royal-blue':            '#1A3F8F',
+      '--gold':                  '#FFC72C',
+      '--near-black':            '#0F1F3A',
+      '--card-bg':               '#0F1F3A',
+      '--panel-bg':              '#12274D',
+      '--border':                'rgba(255,199,44,0.15)',
+      '--text-primary':          '#E8F4FF',
+      '--text-secondary':        'rgba(232,244,255,0.6)',
+      '--body-bg':               '#080F1E',
+      '--header-bg':             'rgba(15,31,58,0.97)',
+      '--stat-bar-bg':           'linear-gradient(90deg,#0A1628 0%,#0F1F3A 50%,#0A1628 100%)',
+      '--red-alert':             '#FF3B3B',
+      '--green-ok':              '#2ECC71',
+      '--gold-glow':             '0 0 12px rgba(255,199,44,0.6),0 0 24px rgba(255,199,44,0.3)',
+      '--gold-glow-strong':      '0 0 16px rgba(255,199,44,0.9),0 0 40px rgba(255,199,44,0.5)',
+      '--red-glow':              '0 0 12px rgba(255,59,59,0.7)',
+      '--feed-bg':               'rgba(26,63,143,0.18)',
+      '--feed-border':           'rgba(26,63,143,0.5)',
+      '--input-bg':              'rgba(26,63,143,0.3)',
+      '--leaderboard-row-hover': 'rgba(255,199,44,0.04)',
+      '--toggle-off-bg':         'rgba(255,255,255,0.1)',
+      '--toggle-off-border':     'rgba(255,255,255,0.2)',
+      '--glow-white':            '#E8F4FF',
+    };
+    Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v));
+    document.body.style.background = vars['--body-bg'];
+  }, []);
+
+  // Apply on mount (dark default) and on every change
+  React.useLayoutEffect(() => { applyTheme(theme); }, [theme]);
+
+  const toggleTheme = () => setTheme(t => {
+    const next = t === 'dark' ? 'light' : 'dark';
+    applyTheme(next); // apply immediately, before state batches
+    return next;
+  });
+
+  // Scheduled demo alerts (only after tutorial finishes)
+  React.useEffect(() => {
+    if (tutActive) return;
+    if (page !== 'dashboard' && page !== 'classroom') return;
+    const alertIds = [3, 4, 5];
+    let idx = 0;
+    const t = setTimeout(() => {
+      const interval = setInterval(() => {
+        if (idx < alertIds.length) {
+          setActiveAlert(ALERTS[alertIds[idx]]);
+          idx++;
+        } else clearInterval(interval);
+      }, 20000);
+      return () => clearInterval(interval);
+    }, 15000);
+    return () => clearTimeout(t);
+  }, [tutActive, page]);
+
+  const handleSelectRoom = (roomId) => {
+    setSelectedRoom(roomId);
+    setPage('classroom');
+    if (tutActive && tutStep === 2 && roomId === 'lh1') {
+      setTimeout(() => setTutStep(3), 400);
+    }
+  };
+
+  const enterDashboard = () => {
+    setPage('dashboard');
+    setTutActive(true);
+    setTutStep(0);
+  };
+
+  const handleBack = () => {
+    if (page === 'classroom') { setPage('dashboard'); setSelectedRoom(null); }
+    else if (page === 'about') { setPage('dashboard'); }
+  };
+
+  const handleTutNext = () => {
+    const next = tutStep + 1;
+    if (next >= TUTORIAL_STEPS.length) { setTutActive(false); return; }
+    setTutStep(next);
+  };
+
+  const handleAlertDismiss = (choice) => {
+    if (tutActive && tutStep === 4) {
+      setActiveAlert(null);
+      setTutStep(5);
+      return;
+    }
+    setActiveAlert(null);
+  };
+
+  const isAppPage = page === 'dashboard' || page === 'classroom';
+
+  return (
+    <div style={{ minHeight:'100vh', background:'var(--body-bg)' }}>
+
+      {/* Slim prototype topbar — sits above header, never covers search */}
+      {isAppPage && (
+        <div className="proto-topbar">
+          ⚡ BIJAK PROTOTYPE — Demo build for UM Technothon 2026. Not final product.
+        </div>
+      )}
+
+      {/* Header on all pages */}
+      <Header
+        page={page}
+        onBack={handleBack}
+        onAbout={() => setPage('about')}
+        theme={theme}
+        onThemeToggle={toggleTheme}
+      />
+
+      {/* Page navigation strip — additive, sits below header */}
+      <UM_NavStrip page={page} onPage={setPage} />
+
+      {/* Pages */}
+      {page === 'about' && (
+        <AboutPage onEnter={enterDashboard} />
+      )}
+
+      {page === 'dashboard' && (
+        <Dashboard
+          onSelectRoom={handleSelectRoom}
+          tutorialStep={tutStep}
+          tutorialActive={tutActive}
+          theme={theme}
+        />
+      )}
+
+      {page === 'classroom' && selectedRoom && (
+        <ClassroomPage
+          roomId={selectedRoom}
+          onBack={handleBack}
+          tutorialStep={tutStep}
+          tutorialActive={tutActive}
+          onTutorialAction={handleTutNext}
+        />
+      )}
+
+      {page === 'faq'             && <FAQPage />}
+      {page === 'troubleshooting' && <TroubleshootingPage />}
+      {page === 'contact'         && <ContactPage />}
+      {page === 'scale'           && <ScalePage />}
+      {page === 'insights'        && <InsightsPage />}
+      {page === 'home'            && <HomeDashboard onSelectRoom={handleSelectRoom} />}
+
+      {/* KAWAN floating chat — only on app pages */}
+      {isAppPage && (
+        <KawanChat isOpen={chatOpen} onToggle={() => setChatOpen(o => !o)} theme={theme} />
+      )}
+
+      {/* Try-Live RPG popup + persistent corner button (not on About) */}
+      {page !== 'about' && (
+        <>
+          <TryLivePopup visible={tryLiveVisible} onDismiss={() => setTryLiveVisible(false)} />
+          {!tryLiveVisible && <TryLiveButton onClick={() => setTryLiveVisible(true)} />}
+        </>
+      )}
+
+      {/* Alert popup */}
+      <AlertPopup alert={activeAlert} onDismiss={handleAlertDismiss} />
+
+      {/* Tutorial overlay — only on app pages */}
+      {isAppPage && (
+        <Tutorial
+          active={tutActive}
+          step={tutStep}
+          onNext={handleTutNext}
+          onSkip={() => setTutActive(false)}
+          onEnd={() => setTutActive(false)}
+          onNavigateRoom={handleSelectRoom}
+          currentPage={page}
+          onShowAlert={(a) => setActiveAlert(a)}
+        />
+      )}
+
+      {/* Demo alert triggers (post-tutorial) */}
+      {isAppPage && !tutActive && (
+        <div style={{
+          position:'fixed', bottom:24, left:24,
+          display:'flex', flexDirection:'column', gap:5,
+          zIndex:500
+        }}>
+          <div style={{ fontSize:9, color:'rgba(128,128,128,0.4)', letterSpacing:'0.06em', textTransform:'uppercase', marginBottom:2 }}>
+            Demo Alerts
+          </div>
+          {ALERTS.slice(0, 4).map(a => (
+            <button key={a.id} onClick={() => setActiveAlert(a)} style={{
+              background: theme === 'light' ? 'rgba(240,245,255,0.95)' : 'rgba(15,31,58,0.92)',
+              border: `1px solid ${theme === 'light' ? 'rgba(26,63,143,0.2)' : 'rgba(255,199,44,0.15)'}`,
+              color: theme === 'light' ? 'rgba(15,31,58,0.6)' : 'rgba(232,244,255,0.5)',
+              borderRadius:6, padding:'4px 10px',
+              fontSize:10, cursor:'pointer',
+              fontFamily:'Poppins', textAlign:'left',
+              backdropFilter:'blur(8px)',
+              transition:'all 0.2s'
+            }}
+            onMouseOver={e => { e.currentTarget.style.borderColor='rgba(255,199,44,0.5)'; e.currentTarget.style.color= theme==='light' ? '#0F1F3A' : 'var(--text-primary)'; }}
+            onMouseOut={e => { e.currentTarget.style.borderColor= theme==='light' ? 'rgba(26,63,143,0.2)' : 'rgba(255,199,44,0.15)'; e.currentTarget.style.color= theme==='light' ? 'rgba(15,31,58,0.6)' : 'rgba(232,244,255,0.5)'; }}
+            >
+              {a.icon} {a.title}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+// BIJAK — Simulated Data
+// All data is hardcoded/simulated for demo purposes
+
+const CLASSROOMS = [
+  {
+    id: 'lh1',
+    name: 'Lecture Hall 1',
+    dept: 'Faculty of Engineering',
+    building: 'Block A',
+    capacity: 120,
+    status: 'occupied',
+    occupancy: 87,
+    efficiency: 91,
+    appliances: { ac: true, projector: true, lights: true, outlets: true },
+    acTemp: 24,
+    brightness: 80,
+    energyToday: 4.2,
+    energyYesterday: 6.1,
+    rmSaved: 18.40,
+    wasteEvents: 2,
+    nextClass: { time: '4:00 PM', name: 'Biomedical Eng Year 2', lecturer: 'Dr. Amirul Hassan' },
+    currentClass: { time: '2:00 PM – 4:00 PM', name: 'Biomedical Engineering Year 1', lecturer: 'Dr. Amirul Hassan' },
+    schedule: [
+      { time: '8:00 AM – 10:00 AM', name: 'Introduction to Circuits', lecturer: 'Dr. Farah Lim', status: 'done' },
+      { time: '10:00 AM – 12:00 PM', name: 'Digital Systems', lecturer: 'Prof. Rajan Nair', status: 'done' },
+      { time: '2:00 PM – 4:00 PM', name: 'Biomedical Engineering Year 1', lecturer: 'Dr. Amirul Hassan', status: 'active' },
+      { time: '4:00 PM – 6:00 PM', name: 'Biomedical Engineering Year 2', lecturer: 'Dr. Amirul Hassan', status: 'upcoming' },
+    ],
+    sensorFeed: [
+      { time: '2:04 PM', text: '87 occupants detected — class in session', type: 'normal', icon: '👥' },
+      { time: '2:01 PM', text: 'AC adjusted 19°C → 24°C — saving 340W 💛', type: 'alert', icon: '🌡️' },
+      { time: '1:58 PM', text: 'Projector signal active — HDMI connected', type: 'success', icon: '📽️' },
+      { time: '1:45 PM', text: 'Appliances pre-activated for 2PM class', type: 'success', icon: '⚡' },
+      { time: '12:02 PM', text: 'Room cleared — Digital Systems ended', type: 'normal', icon: '🚪' },
+      { time: '11:58 AM', text: 'Projector idle 8 min — shutoff deferred (class active)', type: 'alert', icon: '📽️' },
+    ]
+  },
+  {
+    id: 'lab2',
+    name: 'Lab 2',
+    dept: 'Faculty of Computer Science',
+    building: 'Block B',
+    capacity: 40,
+    status: 'waste',
+    occupancy: 0,
+    efficiency: 34,
+    appliances: { ac: true, projector: false, lights: true, outlets: true },
+    acTemp: 18,
+    brightness: 100,
+    energyToday: 3.8,
+    energyYesterday: 2.9,
+    rmSaved: -12.00,
+    wasteEvents: 5,
+    nextClass: { time: '5:00 PM', name: 'Algorithms & Data Structures', lecturer: 'Dr. Mei Ling' },
+    currentClass: null,
+    schedule: [
+      { time: '8:00 AM – 10:00 AM', name: 'Web Development Workshop', lecturer: 'Mr. Khairul Azwan', status: 'done' },
+      { time: '5:00 PM – 7:00 PM', name: 'Algorithms & Data Structures', lecturer: 'Dr. Mei Ling', status: 'upcoming' },
+    ],
+    sensorFeed: [
+      { time: '3:47 PM', text: 'No activity detected for 2h 18min ⚠️', type: 'warning', icon: '⚠️' },
+      { time: '3:45 PM', text: 'AC running at 18°C — WASTE DETECTED 🔴', type: 'warning', icon: '🌡️' },
+      { time: '1:28 PM', text: 'Last occupant exited — room empty', type: 'normal', icon: '🚪' },
+      { time: '10:05 AM', text: 'Web Development Workshop ended', type: 'normal', icon: '📚' },
+    ]
+  },
+  {
+    id: 'tr3',
+    name: 'Tutorial Room 3',
+    dept: 'Faculty of Science',
+    building: 'Block C',
+    capacity: 30,
+    status: 'soon',
+    occupancy: 0,
+    efficiency: 78,
+    appliances: { ac: false, projector: false, lights: false, outlets: false },
+    acTemp: null,
+    brightness: 0,
+    energyToday: 0.8,
+    energyYesterday: 1.4,
+    rmSaved: 6.20,
+    wasteEvents: 0,
+    nextClass: { time: '4:30 PM', name: 'Organic Chemistry', lecturer: 'Dr. Priya Suresh' },
+    currentClass: null,
+    schedule: [
+      { time: '9:00 AM – 11:00 AM', name: 'Physics Lab Debrief', lecturer: 'Dr. Zainab Wahab', status: 'done' },
+      { time: '4:30 PM – 6:30 PM', name: 'Organic Chemistry', lecturer: 'Dr. Priya Suresh', status: 'upcoming' },
+    ],
+    sensorFeed: [
+      { time: '3:52 PM', text: 'Room idle — all appliances off ✅', type: 'success', icon: '✅' },
+      { time: '3:50 PM', text: 'Standby mode activated — next class 4:30 PM', type: 'normal', icon: '💤' },
+      { time: '11:03 AM', text: 'Physics Lab Debrief ended — auto shutoff sequence', type: 'success', icon: '⚡' },
+    ]
+  },
+  {
+    id: 'lh2',
+    name: 'Lecture Hall 2',
+    dept: 'Faculty of Arts & Social Sciences',
+    building: 'Block D',
+    capacity: 200,
+    status: 'occupied',
+    occupancy: 156,
+    efficiency: 88,
+    appliances: { ac: true, projector: true, lights: true, outlets: false },
+    acTemp: 24,
+    brightness: 70,
+    energyToday: 5.6,
+    energyYesterday: 6.8,
+    rmSaved: 14.80,
+    wasteEvents: 1,
+    nextClass: { time: '5:00 PM', name: 'Malaysian Literature', lecturer: 'Prof. Azlina Yusof' },
+    currentClass: { time: '3:00 PM – 5:00 PM', name: 'Modern History of SEA', lecturer: 'Prof. Azlina Yusof' },
+    schedule: [
+      { time: '8:00 AM – 10:00 AM', name: 'Introduction to Psychology', lecturer: 'Dr. Tan Wei Ling', status: 'done' },
+      { time: '3:00 PM – 5:00 PM', name: 'Modern History of SEA', lecturer: 'Prof. Azlina Yusof', status: 'active' },
+      { time: '5:00 PM – 7:00 PM', name: 'Malaysian Literature', lecturer: 'Prof. Azlina Yusof', status: 'upcoming' },
+    ],
+    sensorFeed: [
+      { time: '3:12 PM', text: '156 occupants detected — full capacity 💛', type: 'alert', icon: '👥' },
+      { time: '3:01 PM', text: 'Projector signal active — lecture streaming', type: 'success', icon: '📽️' },
+      { time: '2:55 PM', text: 'Lights auto-dimmed to 70% — daylight sufficient', type: 'success', icon: '💡' },
+    ]
+  },
+  {
+    id: 'lab3',
+    name: 'Lab 3',
+    dept: 'Faculty of Engineering',
+    building: 'Block B',
+    capacity: 35,
+    status: 'empty',
+    occupancy: 0,
+    efficiency: 72,
+    appliances: { ac: false, projector: false, lights: false, outlets: false },
+    acTemp: null,
+    brightness: 0,
+    energyToday: 1.1,
+    energyYesterday: 1.9,
+    rmSaved: 9.60,
+    wasteEvents: 0,
+    nextClass: { time: 'Tomorrow 9AM', name: 'Embedded Systems Lab', lecturer: 'Dr. Kumar Raj' },
+    currentClass: null,
+    schedule: [
+      { time: '9:00 AM – 12:00 PM', name: 'Embedded Systems Lab', lecturer: 'Dr. Kumar Raj', status: 'done' },
+    ],
+    sensorFeed: [
+      { time: '12:14 PM', text: 'All appliances shut down — room secured ✅', type: 'success', icon: '🔒' },
+      { time: '12:02 PM', text: 'Embedded Systems Lab ended', type: 'normal', icon: '📚' },
+    ]
+  },
+  {
+    id: 'cr4',
+    name: 'Conference Room 4',
+    dept: 'Faculty of Business',
+    building: 'Block E',
+    capacity: 20,
+    status: 'waste',
+    occupancy: 0,
+    efficiency: 22,
+    appliances: { ac: true, projector: true, lights: true, outlets: true },
+    acTemp: 20,
+    brightness: 100,
+    energyToday: 2.9,
+    energyYesterday: 1.2,
+    rmSaved: -18.00,
+    wasteEvents: 7,
+    nextClass: null,
+    currentClass: null,
+    schedule: [],
+    sensorFeed: [
+      { time: '3:49 PM', text: 'GHOST BOOKING — room reserved but empty 👻', type: 'warning', icon: '👻' },
+      { time: '2:00 PM', text: 'Booking started — no one detected', type: 'warning', icon: '⚠️' },
+      { time: '1:58 PM', text: 'Appliances activated for 2PM booking', type: 'normal', icon: '⚡' },
+    ]
+  },
+];
+
+const ALERTS = [
+  {
+    id: 'a1',
+    icon: '🚨',
+    eyeState: 'alert',
+    title: 'Unexpected Activity Detected',
+    body: 'Eh, unexpected activity in Lecture Hall 1 — no class scheduled right now. Turn on appliances or nah? 👀',
+    room: 'Lecture Hall 1',
+    actions: [{ label: 'YES, turn on', type: 'primary' }, { label: 'Nah, ignore', type: 'secondary' }]
+  },
+  {
+    id: 'a2',
+    icon: '⚡',
+    eyeState: 'happy',
+    title: 'Class Starting in 5 Minutes',
+    body: 'Class in 5 minutes — getting Lecture Hall 1 ready now. AC, projector and lights coming online 💛',
+    room: 'Lecture Hall 1',
+    actions: [{ label: 'OK got it', type: 'primary' }]
+  },
+  {
+    id: 'a3',
+    icon: '😴',
+    eyeState: 'idle',
+    title: 'No Activity Detected',
+    body: 'No activity detected in Lab 3 — switching off in 5 minutes. Everyone late or should I just shut it all down lah?',
+    room: 'Lab 3',
+    actions: [{ label: 'KEEP ON', type: 'secondary' }, { label: 'SWITCH OFF', type: 'primary' }]
+  },
+  {
+    id: 'a4',
+    icon: '🌡️',
+    eyeState: 'smug',
+    title: 'AC Temperature Adjusted',
+    body: "AC's been running at 18°C weh — bumping to 24°C. That's RM8 back in UM's pocket 😏",
+    room: 'Lab 2',
+    actions: [{ label: 'OK 👍', type: 'primary' }, { label: 'Override', type: 'secondary' }]
+  },
+  {
+    id: 'a5',
+    icon: '👻',
+    eyeState: 'alert',
+    title: 'Ghost Booking Detected',
+    body: 'Ghost booking detected lah — Conference Room 4 was reserved but nobody showed up. Shutting everything down.',
+    room: 'Conference Room 4',
+    actions: [{ label: 'OK, shut it down', type: 'primary' }, { label: 'Wait 10 min', type: 'secondary' }]
+  },
+  {
+    id: 'a6',
+    icon: '📽️',
+    eyeState: 'smug',
+    title: 'Projector Idle',
+    body: "Projector's been idle 20 minutes with no signal weh. Nobody using it — switching off now.",
+    room: 'Lecture Hall 1',
+    actions: [{ label: 'OK', type: 'primary' }, { label: 'Keep ON', type: 'secondary' }]
+  },
+  {
+    id: 'a7',
+    icon: '🌙',
+    eyeState: 'alert',
+    title: 'After-Hours Energy Drain',
+    body: "It's past 10PM and Lab 3 still has equipment running. No activity detected for 2 hours. Shutting down kan?",
+    room: 'Lab 3',
+    actions: [{ label: 'OK, shut down', type: 'primary' }, { label: 'Override', type: 'secondary' }]
+  },
+];
+
+const CHAT_RESPONSES = {
+  "anyone in lecture hall 1": "Yep! 87 occupants detected in Lecture Hall 1 right now 👥 Biomedical Engineering Year 1 class is in session. AC's at 24°C, projector's running. All good lah.",
+  "lecture hall 1": "Lecture Hall 1 is occupied right now — 87 people in there for Biomedical Engineering Year 1. Class runs until 4PM. Next class starts right after at 4PM 📚",
+  "energy": "Today BIJAK saved 32.4 kWh across UM so far 💛 That's RM148.20 saved and 16.2 kg of CO₂ prevented. Lab 2 and Conference Room 4 are still the naughty ones though weh — both wasting energy right now.",
+  "save today": "32.4 kWh saved today across all classrooms 😤 In ringgit? That's RM148.20 back in UM's pocket. CO₂ prevented: 16.2 kg. Not bad kan?",
+  "turn off": "Done — I've flagged that for shutdown 💅 Give me 30 seconds to cycle through the appliance sequence. You'll see it in the sensor feed.",
+  "ac in lab 2": "On it. Lab 2 AC was running at 18°C with zero occupants — that's criminal lah 😤 I've bumped it to 24°C and flagged it for full shutoff in 10 minutes if nobody shows up.",
+  "lab 2": "Lab 2 is a MESS right now 😤 AC blasting at 18°C, lights at 100%, outlets all on — and ZERO people detected for 2+ hours. I've raised a waste alert. Next class is at 5PM. Want me to shut everything down?",
+  "next class tutorial room 3": "Tutorial Room 3 has Organic Chemistry at 4:30PM with Dr. Priya Suresh 🧪 Room's currently off — I'll prep the appliances at 4:20PM automatically.",
+  "tutorial room 3": "Tutorial Room 3 is empty and in standby mode 🌙 All appliances off. Next class: Organic Chemistry with Dr. Priya Suresh at 4:30PM. I'll have everything ready before they arrive.",
+  "wasting": "Right now? Lab 2 and Conference Room 4 are the biggest offenders 😤 Lab 2: AC at 18°C, empty for 2+ hours. Conference Room 4: ghost booking — nobody showed up but everything's running. Combined waste? About RM30/hour. Want me to shut them down?",
+  "report": "Today's waste report: 7 waste events prevented, 32.4 kWh saved, RM148.20 recovered. Biggest save was Lecture Hall 1 (AC adjustment saved RM18.40). Conference Room 4 and Lab 2 still generating active waste alerts. Full report ready in the admin panel.",
+  "default": "Hmm, let me check on that 👀 I've got eyes on all 6 classrooms right now. Anything specific you want — room status, energy data, or appliance control? I gotchu lah 😏"
+};
+
+const LEADERBOARD = [
+  { rank: 1, name: 'Lecture Hall 1', dept: 'Engineering', score: 91, trend: '↑' },
+  { rank: 2, name: 'Lecture Hall 2', dept: 'Arts & Social Sciences', score: 88, trend: '↑' },
+  { rank: 3, name: 'Tutorial Room 3', dept: 'Science', score: 78, trend: '→' },
+  { rank: 4, name: 'Lab 3', dept: 'Engineering', score: 72, trend: '↓' },
+  { rank: 5, name: 'Lab 2', dept: 'Computer Science', score: 34, trend: '↓' },
+  { rank: 6, name: 'Conference Room 4', dept: 'Business', score: 22, trend: '↓' },
+];
